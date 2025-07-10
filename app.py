@@ -222,14 +222,16 @@ def subscribe():
         }
         subscriptions.append(subscription)
 
-        send_email(
+        with app.app_context():
+            send_email(
             recipient=email,
             subject="Subscription Confirmed",
             body="You'll be alerted when a seat opens in:\n\n" + format_section_alert_email(section_data),
         )
 
         if available_seats > 0:
-            send_email(
+            with app.app_context():
+                send_email(
                 recipient=email,
                 subject="Seat Available Now!",
                 body=(
