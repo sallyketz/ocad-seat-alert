@@ -11,11 +11,9 @@ from email_config import SMTP_EMAIL, SMTP_PASSWORD
 app = Flask(__name__)
 
 from dotenv import load_dotenv
-
 load_dotenv()  # load from .env file
 
 app.config.update(
-
     MAIL_SERVER=os.getenv("MAIL_SERVER"),
     MAIL_PORT=int(os.getenv("MAIL_PORT")),
     MAIL_USE_TLS=os.getenv("MAIL_USE_TLS") == "True",
@@ -78,13 +76,12 @@ def check_all_subscriptions():
         current_seats = section.get("Available", 0)
 
         if current_seats > sub.get("last_known_seats", 0) and current_seats > 0:
-            # a seat opened
-            send_email(
-                recipient=sub["email"],
-                subject="Seat Now Available!",
-                body=format_section_alert_email(section),
-            )
-
+            with app.app_context():
+                send_email(
+                    recipient=sub["email"],
+                    subject="Seat Now Available!",
+                    body=format_section_alert_email(section),
+                )
             print(f"alert sent to {sub['email']} for {sub['course_title']}")
         else:
             print(f"no change for {sub['course_title']}")
@@ -161,8 +158,6 @@ def section_details():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-import pprint
-
 def format_section_alert_email(section_data):
     course_code = section_data.get("CourseName", "Unknown Code")
     section_code = f"{course_code}-{section_data.get('Number', '???')}"
@@ -174,11 +169,9 @@ def format_section_alert_email(section_data):
     available = section_data.get("Available", "N/A")
     capacity = section_data.get("Capacity", "N/A")
 
-    # instructor
     instructors = section_data.get("InstructorItems", [])
     instructor_name = instructors[0].get("Name") if instructors else "TBA"
 
-    # meeting info
     time_location = section_data.get("TimeLocationItems", [])
     if time_location:
         meeting_info = time_location[0].get("Time", "–")
@@ -224,26 +217,25 @@ def subscribe():
 
         with app.app_context():
             send_email(
-            recipient=email,
-            subject="Subscription Confirmed",
-            body="You'll be alerted when a seat opens in:\n\n" + format_section_alert_email(section_data),
-        )
+                recipient=email,
+                subject="Subscription Confirmed",
+                body="You'll be alerted when a seat opens in:\n\n" + format_section_alert_email(section_data),
+            )
 
         if available_seats > 0:
             with app.app_context():
                 send_email(
-                recipient=email,
-                subject="Seat Available Now!",
-                body=(
-                    "A section you just requested to be alerted to already has a seat(s) available:\n\n"
-                    + format_section_alert_email(section_data)
-                    + "\n\nRegister now through OCAD Self Service."
-                ),
-            )
+                    recipient=email,
+                    subject="Seat Available Now!",
+                    body=(
+                        "A section you just requested to be alerted to already has a seat(s) available:\n\n"
+                        + format_section_alert_email(section_data)
+                        + "\n\nRegister now through OCAD Self Service."
+                    ),
+                )
 
     save_subscriptions(subscriptions)
     return "OK"
-
 
 # ------------------------ scheduler setup ------------------------
 
@@ -257,4 +249,3 @@ atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == "__main__":
     app.run(debug=True)
-
