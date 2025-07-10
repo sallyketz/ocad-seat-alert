@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sections for {{ course.Name }}</title>
+</head>
+<body>
+<h1>{{ course.Name }} — Sections</h1>
+
+<form method="POST" action="{{ url_for('index') }}?keyword={{ keyword }}&term={{ term }}&course_id={{ course.Id }}">
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Section</th>
+        <th>Term</th>
+        <th>Date/Time</th>
+        <th>Location</th>
+        <th>Seats Available</th>
+        <th>Total Seats</th>
+        <th>Seats Taken</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sec in sections %}
+      <tr>
+        <td><input type="checkbox" name="section_ids" value="{{ sec.Id }}" /></td>
+        <td>{{ sec.SectionNumber or sec.Name or sec.Id }}</td>
+        <td>{{ sec.TermName }}</td>
+        <td>{{ sec.MeetingTimes[0].StartTime if sec.MeetingTimes and sec.MeetingTimes|length > 0 else 'TBD' }}</td>
+        <td>{{ sec.Location or 'TBD' }}</td>
+        <td>{{ sec.SeatsAvailable }}</td>
+        <td>{{ sec.SeatsTotal }}</td>
+        <td>{{ sec.SeatsTaken }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p>
+    <label for="email">Enter your email to get alerts for selected sections:</label><br />
+    <input type="email" name="email" id="email" required />
+  </p>
+
+  <button type="submit">Subscribe</button>
+</form>
+
+<p><a href="{{ url_for('index') }}?keyword={{ keyword }}&term={{ term }}">Back to course list</a></p>
+
+</body>
+</html>

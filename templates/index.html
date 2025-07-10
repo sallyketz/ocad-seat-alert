@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OCAD Seat Alert</title>
+<style>
+  /* reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 2rem auto;
+    max-width: 720px;
+    background: #121212;
+    color: #eee;
+    line-height: 1.5;
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-bottom: 0.2rem;
+    letter-spacing: 1px;
+    color: #e0e0e0;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.25rem;
+  }
+
+  .description {
+    font-size: 1rem;
+    font-style: italic;
+    color: #999;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+  }
+
+  form {
+    margin-bottom: 2rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  select {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin-right: 0.6rem;
+    background: #222;
+    color: #eee;
+    border: 1.5px solid #444;
+    border-radius: 6px;
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+    min-width: 180px;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  select:focus {
+    border-color: #b6eea6; /* soft green */
+    outline: none;
+    background: #1b1b1b;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    background: #b6eea6; /* soft green */
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+
+  button:hover {
+    background: #db95d4; /* muted purple */
+  }
+
+  button:disabled,
+  button[disabled] {
+    background: #555;
+    cursor: not-allowed;
+  }
+
+  .course-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #b6eea6;
+    display: block;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    cursor: pointer;
+    background: #222;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-title:hover,
+  button.course-title:focus {
+    background: #2a3627; /* dark muted green */
+    border-color: #b6eea6;
+    outline: none;
+  }
+
+  .error {
+    color: #f66;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    background: #330000;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    max-width: 600px;
+  }
+
+  .section-block {
+    margin-bottom: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid #444;
+    background: #1e1e1e;
+    border-radius: 8px;
+    transition: background-color 0.25s ease;
+  }
+
+  .section-block label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    cursor: pointer;
+  }
+
+  .section-block input[type="checkbox"] {
+    margin-top: 0.3rem;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .section-block strong {
+    color: #b6eea6;
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  .section-info {
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    color: #ccc;
+    line-height: 1.3;
+  }
+
+  .section-info span {
+    display: inline-block;
+    margin-right: 1.1rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  footer a {
+    color: #b6eea6;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+    color: #db95d4;
+  }
+
+  /* spacing above email input */
+  form[action="/subscribe"] input[type="email"] {
+    margin-top: 1rem;
+  }
+</style>
+
+</head>
+<body>
+  <h1>OCAD Seat Alert</h1>
+  <p class="description">
+    Select course sections and enter your email to be alerted if a seat opens up. <br> OCAD Seat Alert checks for open seats every 15 seconds.
+  </p>
+
+  <form method="get" action="/">
+    <input
+      type="text"
+      name="keyword"
+      placeholder="Search keyword"
+      value="{{ keyword|default('') }}"
+      autocomplete="off"
+    />
+    <select name="term" required>
+      <option value="">Select term</option>
+      <option value="2025FA" {% if term == "2025FA" %}selected{% endif %}>Fall 2025</option>
+      <option value="2025SU" {% if term == "2025SU" %}selected{% endif %}>Summer 2025</option>
+      <option value="2026WI" {% if term == "2026WI" %}selected{% endif %}>Winter 2026</option>
+    </select>
+    <button type="submit">Search</button>
+  </form>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <div id="results">
+    {% if courses %}
+      {% for course in courses %}
+        <form method="get" action="/" style="margin: 0;">
+          <input type="hidden" name="term" value="{{ term }}">
+          <input type="hidden" name="keyword" value="{{ keyword }}">
+          <input type="hidden" name="course_id" value="{{ course.Id }}">
+          <button type="submit" class="course-title" aria-label="View sections for {{ course.SubjectCode }} {{ course.Number }} {{ course.Title }}">
+            {{ course.SubjectCode }}-{{ course.Number }} {{ course.Title }}
+          </button>
+        </form>
+      {% endfor %}
+    {% else %}
+      <p>No courses found.</p>
+    {% endif %}
+  </div>
+
+  {% if sections %}
+  <form id="subscribe-form" method="POST" action="/subscribe" novalidate>
+    <input type="hidden" name="term" value="{{ term }}">
+    <input type="hidden" name="keyword" value="{{ keyword }}">
+    <input id="email" type="email" name="email" required placeholder="Your email"
+      style="width: 100%; max-width: 400px; margin-bottom: 1rem; padding: 0.5rem; font-size: 1rem; border-radius: 6px; border: 1.5px solid #444; background: #222; color: #eee;">
+
+    {% for section_group in sections %}
+      {% if section_group.Sections %}
+        {% for section_data in section_group.Sections %}
+          {% set section = section_data.Section %}
+          <div class="section-block">
+            <label>
+              <input type="checkbox" name="section_ids" value="{{ section.Id }}">
+              <strong>{{ section.SectionNameDisplay }} — {{ section.Title }}</strong>
+            </label>
+            <div class="section-info">
+              <span><strong>Dates:</strong> {{ section.StartDateDisplay }} to {{ section.EndDateDisplay }}</span><br>
+              {% for mt in section.FormattedMeetingTimes %}
+                <span><strong>Times:</strong> {{ mt.DaysOfWeekDisplay }} {{ mt.StartTimeDisplay }}–{{ mt.EndTimeDisplay }} ({{ mt.InstructionalMethodDisplay }})</span><br>
+              {% endfor %}
+              <span><strong>Seats:</strong> {{ section.Available }} available out of {{ section.Capacity }} total</span><br>
+              <span><strong>Instructor:</strong> 
+                {% if section_data.FacultyDisplay %}
+                  {{ section_data.FacultyDisplay }}
+                {% elif section_data.InstructorDetails and section_data.InstructorDetails[0].FacultyName %}
+                  {{ section_data.InstructorDetails[0].FacultyName }}
+                {% else %}
+                  TBA
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- hidden input for course title -->
+    <input type="hidden" name="course_title" value="{{ courses[0].Title if courses else '' }}">
+
+    <button type="submit" style="display: block; margin-top: 0.5rem;">
+      Notify me if a spot opens up
+    </button>
+    <div id="subscription-message" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+  </form>
+  {% endif %}
+
+  <footer>
+    <p>OCAD Seat Alert is not affiliated with OCAD University.</p>
+    <p>Contact: <a href="mailto:ocadseatalert@gmail.com">ocadseatalert@gmail.com</a></p>
+    <p style="font-size: 0.8rem; color: #555; margin-top: 0.5rem;">&copy; 2025 Sally Lopez</p>
+  </footer>
+
+  <script>
+  document.getElementById("subscribe-form").addEventListener("submit", async function (e) {
+    e.preventDefault(); // prevent page reload
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const messageBox = document.getElementById("subscription-message");
+
+    try {
+      const response = await fetch("/subscribe", {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        messageBox.style.color = "#db95d4"; // muted purple (hover color)
+        messageBox.textContent = "You're subscribed! You'll get an email if a seat opens up.";
+        form.reset();
+      } else {
+        messageBox.style.color = "#f66";
+        messageBox.textContent = "Something went wrong. Please try again.";
+      }
+    } catch (error) {
+      console.error(error);
+      messageBox.style.color = "#f66";
+      messageBox.textContent = "Network error. Please check your connection.";
+    }
+  });
+  </script>
+</body>
+</html>

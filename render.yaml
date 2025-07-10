@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ocad-seat-alert
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        value: ocadseatalert@gmail.com
+      - key: MAIL_PASSWORD
+        value: prku qfyi ueer thqy
+      - key: MAIL_DEFAULT_SENDER
+        value: ocadseatalert@gmail.com

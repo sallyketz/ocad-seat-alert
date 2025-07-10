@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Courses for {{ keyword }} in {{ term }}</title></head>
+<body>
+  <h1>Courses matching "{{ keyword }}" in {{ term }}</h1>
+  <ul>
+    {% for course in courses %}
+      <li>
+        <a href="{{ url_for('sections', course_id=course['Id'], term=term, keyword=keyword) }}">
+          {{ course['SubjectCode'] }}-{{ course['Number'] }}: {{ course['Title'] }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('index') }}">Back to search</a>
+</body>
+</html>
